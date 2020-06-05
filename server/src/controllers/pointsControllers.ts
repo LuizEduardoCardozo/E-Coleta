@@ -3,8 +3,7 @@ import knex from '../database/connection';
 
 class PointsController {
 
-    async create( req:Request, res:Response ) {
-        console.log("Olá, mundo!");
+    async create( req: Request, res: Response ) {
         const {nome,email,whatsapp,latitude,longitude,uf,city,itens} = req.body;
 
         const point = {
