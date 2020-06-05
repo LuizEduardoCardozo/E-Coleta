@@ -8,6 +8,8 @@ const PointsController = new pointsControllers;
 const ItensControllers = new itensControllers;
 
 router.get('/itens', ItensControllers.index);
+
+router.get('/points/:id', PointsController.show);
 router.post('/points', PointsController.create);
 
 export default router;
