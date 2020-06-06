@@ -1,5 +1,11 @@
-import React from 'react';
+import React, {useState,useEffect} from 'react';
 import {Link} from 'react-router-dom';
+
+import {Map,  TileLayer, Marker} from 'react-leaflet';
+
+import axios from 'axios';
+
+import api from '../../services/api';
 
 import logo from '../../assets/logo.svg';
 
@@ -9,7 +15,41 @@ import {FiArrowLeft} from 'react-icons/fi'
 
 import './styles.css';
 
+interface Itens {
+    id: number,
+    nome: string,
+    image_url: string,
+}
+
+interface IBGEUFResponse {
+    sigla: string,
+}
+
+interface Uf {
+    name: string
+}
+
 const CreatePoint: React.FC = () => {
+
+  const [itens, setItens] = useState<Itens[]>([]);
+  const [ufList, setUfList ] = useState<string[]>([]);
+
+  useEffect(() => {
+    api.get('itens').then(response => {
+        setItens(response.data);
+    });
+  }, []) 
+
+  useEffect(() => {
+    axios.get<IBGEUFResponse[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados').then(response => {
+        const ufInitials = response.data.map(uf => uf.sigla);
+        setUfList(ufInitials);
+    })
+  }, []);
+
+  console.log(ufList);
+
+
   return (
       <>
         <div id="page-create-point">
@@ -62,11 +102,23 @@ const CreatePoint: React.FC = () => {
                         <h2>Endereço</h2>
                         <span>Selecione o endereço no mapa</span>
                     </legend>   
+
+                        <Map center={[-27.2092052, -49.6401092]} zoom={15}>
+                            <TileLayer 
+                                attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
+                            <Marker position={[-27.2092052, -49.6401092]}/>
+                        </Map>
+
                         <div className="field-group">
                             <div className="field">
                                 <label htmlFor="uf">Estado UF</label>
                                 <select name="uf" id="uf">
                                     <option value="0">Selecione uma UF acima</option>
+                                    {ufList.map(uf => 
+                                        <option key={uf} value={uf}>{uf}</option>
+                                    )}
                                 </select>
                             </div>
                             <div className="field">
@@ -85,30 +137,16 @@ const CreatePoint: React.FC = () => {
                     </legend>
 
                     <ul className="items-grid">
-                        <li>
-                            <img src="http://localhost:3001/uploads/oleo.svg" alt="Oleo"/>
-                            <span>Oleo de cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3001/uploads/oleo.svg" alt="Oleo"/>
-                            <span>Oleo de cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3001/uploads/oleo.svg" alt="Oleo"/>
-                            <span>Oleo de cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3001/uploads/oleo.svg" alt="Oleo"/>
-                            <span>Oleo de cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3001/uploads/oleo.svg" alt="Oleo"/>
-                            <span>Oleo de cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3001/uploads/oleo.svg" alt="Oleo"/>
-                            <span>Oleo de cozinha</span>
-                        </li>
+
+                        {itens.map(item => (
+                            <li key={item.id}>
+                                <img src={item.image_url} alt="Oleo"/>
+                                <span>{item.nome}</span>
+                            </li>
+                        ))
+                        }
+
+
                     </ul>
 
                 </fieldset>
